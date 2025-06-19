@@ -3,9 +3,6 @@ import streamlit as st
 from langchain_aws import ChatBedrock
 from langgraph.prebuilt import create_react_agent
 from modules.mcp_manager import MCPClient
-from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.store.memory import InMemoryStore
-# from langmem import create_manage_memory_tool, create_search_memory_tool
 
 
 class AgentManager:
@@ -41,10 +38,7 @@ class AgentManager:
             st.session_state.server = {}
             st.session_state.tools = []
 
-        # checkpointer = InMemorySaver()
-        # store = InMemoryStore()
-        tools = st.session_state.tools #+ [create_manage_memory_tool(namespace=("memories",)), create_search_memory_tool(namespace=("memories",))]
-        st.session_state.agent = create_react_agent(llm, tools=tools, prompt=config['system_prompt'])
+        st.session_state.agent = create_react_agent(llm, tools=st.session_state.tools, prompt=config['system_prompt'])
                                                     # checkpointer=checkpointer)
 
     async def initialize_mcp_client(self, config):

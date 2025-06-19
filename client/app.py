@@ -3,7 +3,7 @@ import sys
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
-from setuptools.package_index import user_agent
+# from setuptools.package_index import user_agent
 
 from modules.agent_manager import AgentManager
 from modules.config_manager import ConfigManager
@@ -65,6 +65,13 @@ class ChatApp:
             with st.status("Generating response...", expanded=True) as status:
                 st.write("Please wait while agent processes your request. "
                          "Response may take a few minutes depending upon the request.")
+                conversation_history = ''
+                for message in reversed(st.session_state.conversation_history[st.session_state.user_id]):
+                    if message['role'] == 'assistant':
+                        conversation_history += message['content'] + "\n"
+                        break
+                user_text = conversation_history + "\n" + user_text
+
                 with st.chat_message('assistant'):
                     run_async(self.stream_messages(user_text=user_text, messages_container=messages_container,
                                                    progress_container=progress_container))
