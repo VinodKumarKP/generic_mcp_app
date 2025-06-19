@@ -1,0 +1,494 @@
+/* Enhanced Streamlit UI with Modern Design */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-bg: #0a0b0f;
+    --card-bg: #1a1d25;
+    --chat-bg: #242831;
+    --sidebar-bg: #161921;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: #b4b7c1;
+    --text-muted: #6b7280;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Base styling */
+body, .main .block-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Remove default margins and add smooth transitions */
+* {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main container improvements */
+.main .block-container {
+    padding-top: 2rem;
+    max-width: 1200px;
+}
+
+/* Header styling with glassmorphism */
+.main-header {
+    background: var(--primary-gradient);
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+    box-shadow:
+        0 20px 40px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.main-header h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.main-header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Sidebar enhancements */
+.css-1d391kg, .css-1lcbmhc {
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid var(--border-color);
+}
+
+.css-1d391kg .element-container,
+.css-1lcbmhc .element-container {
+    background: transparent !important;
+}
+
+/* Sidebar title styling */
+section[data-testid="stSidebar"] h1 {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Enhanced chat container */
+div[data-testid="stContainer"] {
+    background: var(--chat-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+/* Chat message improvements */
+.chat-message {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chat-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chat-message:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.chat-message:hover::before {
+    opacity: 1;
+}
+
+.chat-message.user {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-left: 4px solid #667eea;
+}
+
+.chat-message.assistant {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+    border-left: 4px solid #4facfe;
+}
+
+/* Avatar improvements */
+.chat-message .avatar-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-message.user .avatar-icon {
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.chat-message.assistant .avatar-icon {
+    background: var(--accent-gradient);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+}
+
+.chat-message .avatar-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.chat-message:hover .avatar-icon::before {
+    left: 100%;
+}
+
+/* Code blocks and syntax highlighting */
+.chat-message .content code {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.9em;
+    color: #fbbf24;
+    font-weight: 500;
+}
+
+.chat-message .content pre {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.chat-message .content pre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--accent-gradient);
+}
+
+/* Input field enhancements */
+.stTextInput > div > div > input,
+.stChatInput > div > div > input {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    color: var(--text-primary) !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stChatInput > div > div > input:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.stTextInput > div > div > input::placeholder,
+.stChatInput > div > div > input::placeholder {
+    color: var(--text-muted) !important;
+    font-weight: 400;
+}
+
+/* Button styling with modern gradients */
+.stButton > button {
+    background: var(--primary-gradient) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4) !important;
+}
+
+.stButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* Selectbox improvements */
+.stSelectbox > div > div {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+}
+
+/* Expander enhancements */
+.streamlit-expanderHeader {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    color: var(--text-primary) !important;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.streamlit-expanderContent {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-top: none !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+/* Status and info messages */
+.stInfo, .stSuccess, .stWarning, .stError {
+    border-radius: 12px !important;
+    border: none !important;
+    backdrop-filter: blur(10px);
+    font-weight: 500;
+}
+
+.stInfo {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%) !important;
+    border-left: 4px solid #4facfe !important;
+}
+
+.stSuccess {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%) !important;
+    border-left: 4px solid var(--success-color) !important;
+}
+
+.stWarning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%) !important;
+    border-left: 4px solid var(--warning-color) !important;
+}
+
+.stError {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%) !important;
+    border-left: 4px solid var(--error-color) !important;
+}
+
+/* Progress container styling */
+div[data-testid="stExpander"] {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    margin-bottom: 1rem;
+}
+
+/* Tool execution display */
+.tool-execution {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+}
+
+/* JSON code styling */
+code[class*="language-json"] {
+    background: #1e1e2e !important;
+    color: #cdd6f4 !important;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-gradient);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-gradient);
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Status dot animation */
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--success-color);
+    margin-right: 0.75rem;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* Timestamps */
+.timestamp {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 0.5rem;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* Responsive design improvements */
+@media screen and (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem;
+    }
+
+    .main-header {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .main-header h1 {
+        font-size: 2rem;
+    }
+
+    .chat-message {
+        padding: 1rem;
+    }
+
+    .chat-message .avatar-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .main-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .chat-message {
+        padding: 0.75rem;
+    }
+
+    .stButton > button {
+        padding: 0.5rem 1.5rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dark-bg: #0a0b0f;
+        --card-bg: #1a1d25;
+        --text-primary: #ffffff;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-color: rgba(255, 255, 255, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.3);
+    }
+}
