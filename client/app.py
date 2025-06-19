@@ -1,14 +1,17 @@
 import datetime
-import sys
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+
+from client.ui.devops_agent_ui import DevOpsAgentUI
+from client.ui.name_lookup_agent_ui import NameLookupAgentUI
+from client.ui.ui_factory import UIFactory
 # from setuptools.package_index import user_agent
 
 from modules.agent_manager import AgentManager
 from modules.config_manager import ConfigManager
 from modules.session_manager import SessionManager
-from modules.ui_manager import StreamlitUIManager
+from client.ui.ui_manager import StreamlitUIManager
 from utils.async_utils import run_async
 
 
@@ -24,6 +27,9 @@ class ChatApp:
     def chat_interface(self):
         self.ui_manager.configure_page()
         agent_name, agent_key, agent_type = self.ui_manager.render_sidebar(self.config_manager.config)
+
+        self.ui_manager = UIFactory().create_ui_manager(agent_name=agent_key)
+
         if st.session_state.previous_agent_key != agent_key:
             st.session_state.conversation_history = {}
             st.session_state.tool_executions = {}
@@ -62,23 +68,24 @@ class ChatApp:
             with messages_container.chat_message("user"):
                 st.markdown(user_text)
 
-            with st.status("Generating response...", expanded=True) as status:
-                st.write("Please wait while agent processes your request. "
-                         "Response may take a few minutes depending upon the request.")
-                conversation_history = ''
-                for message in reversed(st.session_state.conversation_history[st.session_state.user_id]):
-                    if message['role'] == 'assistant':
-                        conversation_history += message['content'] + "\n"
-                        break
-                user_text = conversation_history + "\n" + user_text
+            with messages_container:
+                with st.status("Generating response...", expanded=True) as status:
+                    st.write("Please wait while agent processes your request. "
+                             "Response may take a few minutes depending upon the request.")
+                    conversation_history = ''
+                    for message in reversed(st.session_state.conversation_history[st.session_state.user_id]):
+                        if message['role'] == 'assistant':
+                            conversation_history += message['content'] + "\n"
+                            break
+                    user_text = conversation_history + "\n" + user_text
 
-                with st.chat_message('assistant'):
-                    run_async(self.stream_messages(user_text=user_text, messages_container=messages_container,
-                                                   progress_container=progress_container))
-                    status.update(label="Response received!", state="complete", expanded=False)
-                    st.session_state.is_processing = False
+                    with st.chat_message('assistant'):
+                        run_async(self.stream_messages(user_text=user_text, messages_container=messages_container,
+                                                       progress_container=progress_container))
+                        status.update(label="Response received!", state="complete", expanded=False)
+                        st.session_state.is_processing = False
 
-            st.rerun()
+                st.rerun()
 
     async def stream_messages(self, user_text, messages_container=None, progress_container=None):
         async for chunk in st.session_state.agent.astream(
@@ -123,16 +130,22 @@ class ChatApp:
                         stop_reason = None
                         if hasattr(msg, "response_metadata") and msg.response_metadata:
                             stop_reason = msg.response_metadata.get('stop_reason', None)
-                        if hasattr(msg, "content") and msg.content and stop_reason == "end_turn":
-                            with messages_container.chat_message("assistant"):
-                                if isinstance(msg.content, list) and len(msg.content) > 0:
-                                    content = msg.content[0]['text']
-                                else:
-                                    content = msg.content
-                                st.session_state.conversation_history[st.session_state.user_id].append(
-                                    {"role": "assistant", "content": content}
-                                )
-                                st.write(content)
+                        tool_id = msg.id
+                        if hasattr(msg, "content") and msg.content and stop_reason in ["end_turn", "max_tokens", "tool_use"]:
+                            if isinstance(msg.content, list) and len(msg.content) > 0:
+                                content = str(msg.content[0].get('text', '')).strip()
+                            else:
+                                content = str(msg.content).strip()
+
+                            if tool_id and tool_id not in st.session_state.tool_execution_run_id_list:
+                                if len(content) > 0:
+                                    with messages_container.chat_message("assistant"):
+                                        st.session_state.tool_execution_run_id_list.append(tool_id)
+                                        if len(content) > 0:
+                                            st.session_state.conversation_history[st.session_state.user_id].append(
+                                                {"role": "assistant", "content": content}
+                                            )
+                                            st.write(content)
 
     def run(self):
         self.chat_interface()

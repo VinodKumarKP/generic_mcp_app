@@ -45,7 +45,7 @@ async def get_names_by_surname(surname: str) -> str:
     names = NAMES_DB.get(surname_lower, [])
 
     if not names:
-        return f"No names found for surname '{surname}'"
+        raise ValueError (f"No names found for surname '{surname}'")
 
     return f"Found {len(names)} names for '{surname}': {', '.join(names)}"
 

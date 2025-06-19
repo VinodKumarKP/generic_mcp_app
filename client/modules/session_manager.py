@@ -16,7 +16,8 @@ class SessionManager:
             st.session_state.tools = None
         if 'tool_executions' not in st.session_state:
             st.session_state.tool_executions = {}
-            # User identification
+
+        # User identification
         if "user_id" not in st.session_state:
             st.session_state.user_id = str(uuid.uuid4())
         if "is_processing" not in st.session_state:
@@ -41,6 +42,9 @@ class SessionManager:
 
         if 'tool_execution_count' not in st.session_state:
             st.session_state.tool_execution_count = 0
+
+        if 'tool_execution_run_id_list'not in st.session_state:
+            st.session_state.tool_execution_run_id_list = []
 
 
         if 'model' not in st.session_state:

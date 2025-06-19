@@ -106,6 +106,7 @@ class StreamlitUIManager:
     def display_tool(self, tool_name, tool_config, execution_index):
         st.markdown(f"### Execution #{execution_index}: `{tool_name}`")
         st.markdown(f"**Input:** ```json{json.dumps(tool_config['input'])}```")
+        st.markdown(f"**Output:** ```json{json.dumps(tool_config['output'])}```")
         st.markdown(f"**Time:** {tool_config['timestamp']}")
         st.divider()
 
