@@ -62,13 +62,15 @@ agent:
         'name': 'scan_result_server',
         'command': 'python3.11',
         'args': [ 'mcp_servers/scan_results.py' ],
-        'description': 'Security scanning and analysis tools'
+        'description': 'This server provides security scanning and analysis tools',
+        'title': 'Scan Result Server'
       },
       {
         'name': 'git_utils',
         'command': 'python3.11',
         'args': [ 'mcp_servers/git_server.py' ],
-        'description': 'Git cloning and git operation tools'
+        'description': 'Git cloning and git operation tools',
+        'title': 'Git Utils Server'
       }
     ]
     system_prompt: |
@@ -96,7 +98,8 @@ agent:
         'name': 'git_utils',
         'command': 'python3.11',
         'args': [ 'mcp_servers/git_server.py' ],
-        'description': 'Git cloning and git operation tools'
+        'description': 'Git cloning and git operation tools',
+        'title': 'Git Utils Server'
       }
     ]
     system_prompt: |
