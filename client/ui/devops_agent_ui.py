@@ -1,7 +1,7 @@
+import streamlit as st
 from typing_extensions import override
 
 from client.ui.ui_manager import StreamlitUIManager
-import streamlit as st
 
 
 class DevOpsAgentUI(StreamlitUIManager):

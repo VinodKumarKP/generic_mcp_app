@@ -1,11 +1,11 @@
 model:
   model_id: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0'
-  temperature:  0.0
+  temperature: 0.0
   max_tokens: 8000
 agent:
   name-lookup:
     model:
-      temperature:  0.0
+      temperature: 0.0
       max_tokens: 100
     name: Name Lookup
     type: mcp
@@ -14,7 +14,7 @@ agent:
       ## Instructions
       Provide the name of the person to lookup. This agent will provide the results.
       If the available tools does not solve the query, then use bedrock to get the answer.
-  
+      
       ## Sample Prompts
       - What is the phone number of <<name>>?
         - Example: "What is the phone number of John Doe?"
@@ -67,7 +67,7 @@ agent:
       {
         'name': 'git_utils',
         'command': 'python3.11',
-        'args': [ 'mcp_servers/git_utils.py' ],
+        'args': [ 'mcp_servers/git_server.py' ],
         'description': 'Git cloning and git operation tools'
       }
     ]
@@ -95,7 +95,7 @@ agent:
       {
         'name': 'git_utils',
         'command': 'python3.11',
-        'args': [ 'mcp_servers/git_utils.py' ],
+        'args': [ 'mcp_servers/git_server.py' ],
         'description': 'Git cloning and git operation tools'
       }
     ]

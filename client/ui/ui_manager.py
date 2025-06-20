@@ -3,7 +3,7 @@ import os
 from typing import Dict
 
 import streamlit as st
-from modules.constants import Constants
+from manager.constants import Constants
 
 
 class StreamlitUIManager:
@@ -48,13 +48,12 @@ class StreamlitUIManager:
 
         return agent_name, agent_key, agent_type
 
-
     def model_info_container(self):
         if st.session_state.model:
             with st.sidebar:
                 st.divider()
                 with st.expander(f"Model Details", expanded=False):
-                    for k,v in st.session_state.model.items():
+                    for k, v in st.session_state.model.items():
                         st.markdown(f"{k}: {v}")
 
     def server_info_container(self):
@@ -116,7 +115,6 @@ class StreamlitUIManager:
                 self.display_tool(tool_name=tool_name,
                                   tool_config=tool_config,
                                   execution_index=i + 1)
-
 
     def initialize_user_interface(self):
         user_text = st.chat_input(

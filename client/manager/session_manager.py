@@ -7,6 +7,10 @@ import streamlit as st
 class SessionManager:
 
     def initialize_state(self):
+        # User identification
+        if "user_id" not in st.session_state:
+            st.session_state.user_id = str(uuid.uuid4())
+
         if 'loop' not in st.session_state:
             st.session_state.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(st.session_state.loop)
@@ -17,9 +21,6 @@ class SessionManager:
         if 'tool_executions' not in st.session_state:
             st.session_state.tool_executions = {}
 
-        # User identification
-        if "user_id" not in st.session_state:
-            st.session_state.user_id = str(uuid.uuid4())
         if "is_processing" not in st.session_state:
             st.session_state.is_processing = False
 
@@ -43,9 +44,8 @@ class SessionManager:
         if 'tool_execution_count' not in st.session_state:
             st.session_state.tool_execution_count = 0
 
-        if 'tool_execution_run_id_list'not in st.session_state:
+        if 'tool_execution_run_id_list' not in st.session_state:
             st.session_state.tool_execution_run_id_list = []
-
 
         if 'model' not in st.session_state:
             st.session_state.model = None

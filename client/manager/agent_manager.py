@@ -2,7 +2,7 @@ import boto3
 import streamlit as st
 from langchain_aws import ChatBedrock
 from langgraph.prebuilt import create_react_agent
-from modules.mcp_manager import MCPClient
+from manager.mcp_manager import MCPClient
 
 
 class AgentManager:
@@ -24,7 +24,7 @@ class AgentManager:
         if global_model_config is None:
             global_model_config = {}
         try:
-            global_model_config.update(config.get('model',{}))
+            global_model_config.update(config.get('model', {}))
             st.session_state.model = global_model_config
             llm = self.create_llm_model(**global_model_config)
         except Exception as e:
@@ -39,7 +39,7 @@ class AgentManager:
             st.session_state.tools = []
 
         st.session_state.agent = create_react_agent(llm, tools=st.session_state.tools, prompt=config['system_prompt'])
-                                                    # checkpointer=checkpointer)
+        # checkpointer=checkpointer)
 
     async def initialize_mcp_client(self, config):
         st.session_state.client = MCPClient(config)

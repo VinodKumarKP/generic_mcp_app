@@ -3,15 +3,11 @@ import datetime
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
-from client.ui.devops_agent_ui import DevOpsAgentUI
-from client.ui.name_lookup_agent_ui import NameLookupAgentUI
 from client.ui.ui_factory import UIFactory
-# from setuptools.package_index import user_agent
-
-from modules.agent_manager import AgentManager
-from modules.config_manager import ConfigManager
-from modules.session_manager import SessionManager
 from client.ui.ui_manager import StreamlitUIManager
+from manager.agent_manager import AgentManager
+from manager.config_manager import ConfigManager
+from manager.session_manager import SessionManager
 from utils.async_utils import run_async
 
 
@@ -131,7 +127,8 @@ class ChatApp:
                         if hasattr(msg, "response_metadata") and msg.response_metadata:
                             stop_reason = msg.response_metadata.get('stop_reason', None)
                         tool_id = msg.id
-                        if hasattr(msg, "content") and msg.content and stop_reason in ["end_turn", "max_tokens", "tool_use"]:
+                        if hasattr(msg, "content") and msg.content and stop_reason in ["end_turn", "max_tokens",
+                                                                                       "tool_use"]:
                             if isinstance(msg.content, list) and len(msg.content) > 0:
                                 content = str(msg.content[0].get('text', '')).strip()
                             else:
@@ -149,6 +146,7 @@ class ChatApp:
 
     def run(self):
         self.chat_interface()
+
 
 def argument_parser():
     import argparse
