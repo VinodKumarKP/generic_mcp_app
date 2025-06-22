@@ -12,11 +12,11 @@ class NameLookupAgentUI(StreamlitUIManager):
 
         with col1:
             with st.form(key="user_input_form", clear_on_submit=True):
-                surname = st.text_input("Enter surname")
+                surname = st.text_input("Enter surname", disabled=st.session_state.is_processing)
                 with st.expander("Advanced options"):
                     fmt = st.radio("Select format", ["none", "uppercase", "lowercase", "titlecase", "capitalize"], )
 
-                user_text = st.form_submit_button("Submit")
+                user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
                 if user_text:
                     user_text = f"Look up name with surname {surname}" + (
                         f" and format it as {fmt}" if fmt != "none" else "")

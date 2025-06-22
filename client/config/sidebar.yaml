@@ -3,6 +3,21 @@ model:
   temperature: 0.0
   max_tokens: 8000
 agent:
+  devops-code-remediation-agent:
+    name: DevOps Code Remediation
+    type: bedrock
+    instructions: |
+      ## Instructions
+      Provide the giturl and branch of the repository to be scanned. This agent will scan the repository and provide the results.
+
+      ## Sample Prompt
+      - Help me analyze the git url <<giturl>> and branch <<branch>> of the repository <<repository_name>> for any code issues.
+        - Example: "Help me analyze the git url https://github.com/example/project.git and branch main of the repository project-name for any code issues."
+      - Provide me coding best practice in <<programming language>>
+        - Example: "Provide me coding best practice in Python."
+        - Example: "Provide me coding best practice in JavaScript."
+      - Help me analyze the git url <<giturl>> and branch <<branch>> of the repository <<repository_name>> for any code issues and provide me remediated code.
+        - Example: "Help me analyze the git url https://github.com/example/webapp.git and branch development of the repository webapp for any code issues and provide me remediated code."
   name-lookup:
     model:
       temperature: 0.0
@@ -43,20 +58,17 @@ agent:
       If necessary tools are not available, use model to get the answer. If the result is not available, inform the user that you are unable to find the information.
       Always provide clear responses.
   deployment-release-manager-agent:
-    name: Deployment Release Manager Agent
+    name: Deployment Release Manager
     type: mcp
     instructions: |
       ## Instructions
       Analyze the code scan result of the provided project and summarize the results. Based on that analysis, provide a list of recommended actions 
       and also indicate whether the project is ready for deployment or not.
       
-      ## Sample Prompts
-      - What are the recommendations for <<project_name>>?
-        - Example: "What are the recommendations for my project?"
-      - What are the recommendations for <<project_name>> with high test coverage?
-        - Example: "What are the recommendations for my project with high test coverage?"
-      - What are the recommendations for <<project_name>> with high test coverage and high code quality?
-        - Example: "What are the recommendations for my project with high test coverage and high code quality?"
+      User can select from following level of report:
+        - Summary Report
+        - Detailed Report
+
     servers: [
       {
         'name': 'scan_result_server',
@@ -78,21 +90,20 @@ agent:
       Analyze the code scan result of the provided project and summarize the results. If the prompt already has the scan results, use those results directly.
       Based on that analysis, provide a list of recommended actions 
       and also indicate whether the project is ready for deployment or not.
-  git-utils-agent:
-    name: Git Utils Agent
+  git-ops-agent:
+    name: Git Ops
     type: mcp
     instructions: |
       ## Instructions
-      Analyze the code scan result of the provided project and summarize the results. Based on that analysis, provide a list of recommended actions 
-      and also indicate whether the project is ready for deployment or not.
+      Provide the giturl and the agent will clone the repository and can provide the following statistics:
+        - commit history
+        - file list
+        - programming language used
+        - repository structure
+        - contributors stats
+      
+      User can select the list of statistics from the advanced options. By default, all statistics are provided.
 
-      ## Sample Prompts
-      - What are the recommendations for <<project_name>>?
-        - Example: "What are the recommendations for my project?"
-      - What are the recommendations for <<project_name>> with high test coverage?
-        - Example: "What are the recommendations for my project with high test coverage?"
-      - What are the recommendations for <<project_name>> with high test coverage and high code quality?
-        - Example: "What are the recommendations for my project with high test coverage and high code quality?"
     servers: [
       {
         'name': 'git_utils',
@@ -114,15 +125,6 @@ agent:
     type: mcp
     instructions: |
       ## Instructions
-      Analyze the code scan result of the provided project and summarize the results. Based on that analysis, provide a list of recommended actions 
-      and also indicate whether the project is ready for deployment or not.
-      
-      ## Sample Prompts
-      - What are the recommendations for <<project_name>>?
-        - Example: "What are the recommendations for my project?"
-      - What are the recommendations for <<project_name>> with high test coverage?
-        - Example: "What are the recommendations for my project with high test coverage?"
-      - What are the recommendations for <<project_name>> with high test coverage and high code quality?
-        - Example: "What are the recommendations for my project with high test coverage and high code quality?"
+      This agent can answer general questions and provide information on a wide range of topics.
     system_prompt: |
       You are a helpful assistant who can answer general questions and provide information on a wide range of topics.

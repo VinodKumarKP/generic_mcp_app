@@ -2,21 +2,25 @@ import datetime
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.runnables import RunnableConfig
 
 from client.ui.ui_factory import UIFactory
 from client.ui.ui_manager import StreamlitUIManager
 from manager.agent_manager import AgentManager
+from manager.aws_client_manager import AWSClientManager
 from manager.config_manager import ConfigManager
 from manager.session_manager import SessionManager
 from utils.async_utils import run_async
+from utils.constants import Constants
 
 
 class ChatApp:
     def __init__(self, config_file="sidebar.yaml"):
         self.config_manager = ConfigManager(config_file=config_file)
         self.session_manager = SessionManager()
-        self.ui_manager = StreamlitUIManager()
-        self.agent_manager = AgentManager()
+        self.aws_manager = AWSClientManager()
+        self.agent_manager = AgentManager(aws_clients=self.aws_manager)
+        self.ui_manager = StreamlitUIManager(agent_manager=self.agent_manager)
 
         self.session_manager.initialize_state()
 
@@ -24,14 +28,15 @@ class ChatApp:
         self.ui_manager.configure_page()
         agent_name, agent_key, agent_type = self.ui_manager.render_sidebar(self.config_manager.config)
 
-        self.ui_manager = UIFactory().create_ui_manager(agent_name=agent_key)
+        self.ui_manager = UIFactory().create_ui_manager(agent_name=agent_key, agent_manager=self.agent_manager)
 
         if st.session_state.previous_agent_key != agent_key:
             st.session_state.conversation_history = {}
             st.session_state.tool_executions = {}
             st.session_state.tool_execution_count = 0
             st.session_state.previous_agent_key = agent_key
-            run_async(self.agent_manager.initialize_agent(config=self.config_manager.config['agent'][agent_key],
+            run_async(self.agent_manager.initialize_agent(agent_key=agent_key,
+                                                          config=self.config_manager.config['agent'][agent_key],
                                                           global_model_config=self.config_manager.config['model']))
 
         if st.session_state.agent is None:
@@ -40,6 +45,12 @@ class ChatApp:
 
         self.ui_manager.initialize_sidebar_widgets()
         user_text, messages_container, progress_container = self.ui_manager.initialize_user_interface()
+
+        prompt_list = []
+        if isinstance(user_text, str):
+            prompt_list.append(user_text)
+        else:
+            prompt_list = user_text
 
         with messages_container:
             self.ui_manager.render_chat_history(st.session_state.user_id, st.session_state.conversation_history)
@@ -50,19 +61,19 @@ class ChatApp:
         if user_text and not st.session_state.is_processing:
             # Set processing state immediately
             st.session_state.is_processing = True
-            st.session_state.pending_user_text = user_text
+            st.session_state.pending_user_text = prompt_list
             st.session_state.tool_executions = {}
             st.session_state.tool_execution_count = 0
             st.rerun()  # Force rerun to update UI state
 
         if st.session_state.pending_user_text and st.session_state.is_processing:
-            user_text = st.session_state.pending_user_text
+            prompt_list = st.session_state.pending_user_text
             st.session_state.pending_user_text = None
             st.session_state.conversation_history[st.session_state.user_id].append(
-                {"role": "user", "content": user_text}
+                {"role": "user", "content": '\n'.join(prompt_list)}
             )
-            with messages_container.chat_message("user"):
-                st.markdown(user_text)
+            with messages_container.chat_message("user", avatar=Constants.USER_AVATAR):
+                st.markdown('\n'.join(prompt_list))
 
             with messages_container:
                 with st.status("Generating response...", expanded=True) as status:
@@ -73,15 +84,43 @@ class ChatApp:
                         if message['role'] == 'assistant':
                             conversation_history += message['content'] + "\n"
                             break
-                    user_text = conversation_history + "\n" + user_text
 
-                    with st.chat_message('assistant'):
-                        run_async(self.stream_messages(user_text=user_text, messages_container=messages_container,
-                                                       progress_container=progress_container))
+                    with st.chat_message('assistant', avatar=Constants.ASSISTANT_AVATAR):
+                        for prompt in prompt_list:
+                            if self.config_manager.config['agent'][agent_key]['type'] == 'mcp':
+                                user_text = conversation_history + "\n" + '\n'.join(prompt)
+                                run_async(
+                                    self.stream_messages(user_text=user_text, messages_container=messages_container,
+                                                         progress_container=progress_container))
+                            elif self.config_manager.config['agent'][agent_key]['type'] == 'bedrock':
+                                run_async(self.stream_bedrock_messages(user_text=prompt,
+                                                                       messages_container=messages_container,
+                                                                       progress_container=progress_container))
                         status.update(label="Response received!", state="complete", expanded=False)
                         st.session_state.is_processing = False
 
                 st.rerun()
+
+    async def stream_bedrock_messages(self, user_text, messages_container=None, progress_container=None):
+        input_dict = {
+            "input": user_text,
+            "chat_history": [],
+            "session_id": st.session_state.session_id
+        }
+        config = {"session_id": st.session_state.session_id}
+        runnable_config = RunnableConfig(**config)
+
+        # Try with session configuration
+        response = st.session_state.agent.invoke(
+            input_dict,
+            session_id=st.session_state.session_id,
+            configurable=runnable_config
+        )
+        with messages_container.chat_message("assistant", avatar=Constants.ASSISTANT_AVATAR):
+            st.session_state.conversation_history[st.session_state.user_id].append(
+                {"role": "assistant", "content": response.messages[0].content}
+            )
+            st.markdown(response.messages[0].content, unsafe_allow_html=True)
 
     async def stream_messages(self, user_text, messages_container=None, progress_container=None):
         async for chunk in st.session_state.agent.astream(
@@ -136,13 +175,14 @@ class ChatApp:
 
                             if tool_id and tool_id not in st.session_state.tool_execution_run_id_list:
                                 if len(content) > 0:
-                                    with messages_container.chat_message("assistant"):
+                                    with messages_container.chat_message("assistant",
+                                                                         avatar=Constants.ASSISTANT_AVATAR):
                                         st.session_state.tool_execution_run_id_list.append(tool_id)
                                         if len(content) > 0:
                                             st.session_state.conversation_history[st.session_state.user_id].append(
                                                 {"role": "assistant", "content": content}
                                             )
-                                            st.write(content)
+                                            st.markdown(content, unsafe_allow_html=True)
 
     def run(self):
         self.chat_interface()

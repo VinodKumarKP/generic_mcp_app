@@ -3,10 +3,15 @@ import os
 from typing import Dict
 
 import streamlit as st
-from manager.constants import Constants
+from manager.agent_manager import AgentManager
+
+from utils.constants import Constants
 
 
 class StreamlitUIManager:
+
+    def __init__(self, agent_manager: AgentManager):
+        self.agent_manager = agent_manager
 
     def configure_page(self):
         """Configure Streamlit page settings."""
@@ -22,11 +27,14 @@ class StreamlitUIManager:
     def render_sidebar(self, config: Dict):
         """Render the sidebar with a title."""
         st.sidebar.title("AI Assistant")
+        agent_list = self.agent_manager.get_aws_bedrock_agent_list()
 
         option_list = {}
         option_list.update(
             {values['name']: f"{key}:{values['name']}:{values['type']}" for key, values in config['agent'].items() if
              values['type'] == 'mcp'})
+        option_list.update({values['name']: f"{key}:{agent}:{values['type']}"
+                            for agent in agent_list for key, values in config['agent'].items() if key in agent})
 
         with st.sidebar:
             st.subheader("Settings")
@@ -89,9 +97,10 @@ class StreamlitUIManager:
                 content = message["content"]
 
                 if role == "user":
-                    st.chat_message("user", avatar=Constants.USER_AVATAR).write(content)
+                    st.chat_message("user", avatar=Constants.USER_AVATAR).markdown(content, unsafe_allow_html=True)
                 else:
-                    st.chat_message("assistant", avatar=Constants.ASSISTANT_AVATAR).write(content)
+                    st.chat_message("assistant", avatar=Constants.ASSISTANT_AVATAR).write(content,
+                                                                                          unsafe_allow_html=True)
 
     def load_css(self):
         """Load CSS styles for the application."""
