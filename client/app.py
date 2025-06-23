@@ -45,6 +45,10 @@ class ChatApp:
     def chat_interface(self):
         self.ui_manager.configure_page()
         agent_name, agent_key, agent_type = self.ui_manager.render_sidebar(self.config_manager.config)
+        if agent_key is None:
+            st.error("No agent selected. Please select an agent from the sidebar.")
+            return
+
         self.ui_manager.configure_header(agent_name=self.config_manager.config['agent'][agent_key]['name'])
 
         self.ui_manager = UIFactory().create_ui_manager(agent_name=agent_key, agent_manager=self.agent_manager)

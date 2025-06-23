@@ -25,39 +25,86 @@ class StreamlitUIManager:
     def configure_header(self, agent_name: str):
         st.header(f"💬 Chat with {agent_name.title()} Agent")
 
-    def render_sidebar(self, config: Dict):
-        """Render the sidebar with a title."""
-        st.sidebar.title("AI Assistant")
-        agent_list = self.agent_manager.get_aws_bedrock_agent_list()
+    def _render_sidebar_header(self):
+        """Render professional sidebar header."""
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem 0;">
+            <h1 style="margin: 0; color: var(--primary-blue); font-size: 1.5rem;">
+                ⚡ AI Assistant
+            </h1>
+            <p style="margin: 0.5rem 0 0 0; color: var(--dark-text-muted); font-size: 0.875rem;">
+                Powered by AWS Bedrock
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        option_list = {}
-        option_list.update(
-            {values['name']: f"{key}:{values['name']}:{values['type']}:{values.get('order', 100)}" for key, values in
-             config['agent'].items() if
-             values['type'] == 'mcp'})
-        option_list.update({values['name']: f"{key}:{agent}:{values['type']}:{values.get('order', 100)}"
-                            for agent in agent_list for key, values in config['agent'].items() if key in agent})
+    def _filter_agent_options(self, option_list: Dict[str, str], search_term: str) -> Dict[str, str]:
+        """Filter agent options based on search term."""
+        if not search_term:
+            return option_list
 
-        option_list = dict(sorted(option_list.items(), key=lambda item: int(item[1].split(":")[-1])))
+        search_lower = search_term.lower()
+        return {
+            name: value for name, value in option_list.items()
+            if search_lower in name.lower() or search_lower in value.lower()
+        }
 
-        with st.sidebar:
-            st.subheader("Settings")
-            agent_name = st.selectbox(
-                "Select Agent",
-                options=[
-                    option for option in option_list.keys()
-                ],
-                disabled=st.session_state.is_processing
+    def _render_selected_agent(self, config: Dict):
+        with st.container(border=True):
+            agent_list = self.agent_manager.get_aws_bedrock_agent_list()
+
+            option_list = {}
+            option_list.update(
+                {values['name']: f"{key}:{values['name']}:{values['type']}:{values.get('order', 100)}" for key, values in
+                 config['agent'].items() if
+                 values['type'] == 'mcp'})
+            option_list.update({values['name']: f"{key}:{agent}:{values['type']}:{values.get('order', 100)}"
+                                for agent in agent_list for key, values in config['agent'].items() if key in agent})
+
+            option_list = dict(sorted(option_list.items(), key=lambda item: int(item[1].split(":")[-1])))
+
+            search_term = st.text_input(
+                "🔍 Search agents...",
+                placeholder="Type to filter agents",
+                key="agent_search",
+                help="Search by agent name or type"
             )
 
-            agent_key = option_list[agent_name].split(":")[0]
-            agent_type = option_list[agent_name].split(":")[2]
-            agent_name = option_list[agent_name].split(":")[1]
+            # Filter options based on search
+            filtered_options = self._filter_agent_options(option_list, search_term)
 
+            if not filtered_options:
+                st.warning("No agents match your search criteria.")
+                return None, None, None
+
+            selected_agent = st.selectbox(
+                "Select Agent",
+                options=list(filtered_options.keys()),
+                disabled=st.session_state.get('is_processing', False),
+                help="Choose an AI agent to interact with",
+                key="agent_selector"
+            )
             st.divider()
 
-            with st.expander("ⓛ  Instructions", expanded=False):
-                st.markdown(config['agent'][agent_key]['instructions'], unsafe_allow_html=True)
+            if selected_agent:
+                agent_key = option_list[selected_agent].split(":")[0]
+                agent_type = option_list[selected_agent].split(":")[2]
+                agent_name = option_list[selected_agent].split(":")[1]
+
+                with st.expander("ⓛ  Instructions", expanded=False):
+                    st.markdown(config['agent'][agent_key]['instructions'], unsafe_allow_html=True)
+
+                return agent_name, agent_key, agent_type
+            else:
+                st.error("No agent selected. Please select an agent to continue.")
+                return None, None, None
+
+    def render_sidebar(self, config: Dict):
+        """Render the sidebar with a title."""
+        st.sidebar.title("⚡ AI Assistant")
+
+        with st.sidebar:
+            agent_name, agent_key, agent_type = self._render_selected_agent(config=config)
 
         return agent_name, agent_key, agent_type
 
@@ -66,6 +113,7 @@ class StreamlitUIManager:
             with st.sidebar:
                 st.divider()
                 with st.sidebar.expander("⚙️  Basic config", expanded=False):
+                    st.subheader("Model Id: " + config.get('mode_id', global_model_config.get('model_id', '')))
                     st.session_state.previous_model_max_token = st.session_state.model_max_token
                     st.session_state.model_max_token = st.number_input("Max tokens",
                                                                        min_value=10,
