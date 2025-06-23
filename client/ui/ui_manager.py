@@ -21,8 +21,9 @@ class StreamlitUIManager:
             layout="wide"
         )
         self.load_css()
-        # Main chat interface
-        st.header("Chat with Agent")
+
+    def configure_header(self, agent_name: str):
+        st.header(f"💬 Chat with {agent_name.title()} Agent")
 
     def render_sidebar(self, config: Dict):
         """Render the sidebar with a title."""
@@ -45,7 +46,8 @@ class StreamlitUIManager:
                 "Select Agent",
                 options=[
                     option for option in option_list.keys()
-                ]
+                ],
+                disabled=st.session_state.is_processing
             )
 
             agent_key = option_list[agent_name].split(":")[0]
@@ -54,7 +56,7 @@ class StreamlitUIManager:
 
             st.divider()
 
-            with st.expander("Instructions", expanded=False):
+            with st.expander("ⓛ  Instructions", expanded=False):
                 st.markdown(config['agent'][agent_key]['instructions'], unsafe_allow_html=True)
 
         return agent_name, agent_key, agent_type
@@ -72,13 +74,17 @@ class StreamlitUIManager:
                                                                                                          global_model_config.get(
                                                                                                              'max_tokens',
                                                                                                              4096)),
-                                                                       step=512, )
+                                                                       step=512,
+                                                                       disabled=st.session_state.is_processing,
+                                                                       help="Maximum number of tokens to generate. A word is generally 2-3 tokens")
                     st.session_state.previous_model_temperature = st.session_state.model_temperature
                     st.session_state.model_temperature = st.slider("Temperature", 0.0, 1.0, step=0.05,
                                                                    value=config.get('model', {}).get('temperature',
                                                                                                      global_model_config.get(
                                                                                                          'temperature',
-                                                                                                         1.0)))
+                                                                                                         1.0)),
+                                                                   disabled=st.session_state.is_processing,
+                                                                   help="Higher values make the output more random, lower values make it more deterministic")
 
     def server_info_container(self):
         if st.session_state.server:

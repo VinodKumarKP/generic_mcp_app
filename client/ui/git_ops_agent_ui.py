@@ -14,7 +14,8 @@ class GitOpsAgentUI(StreamlitUIManager):
         with st.form(key="user_input_form", clear_on_submit=True):
             project_url = st.text_input("Project URL",
                                         placeholder="Enter the Git repository URL" if not st.session_state.is_processing else "Processing... Please wait",
-                                        disabled=st.session_state.is_processing, max_chars=300)
+                                        disabled=st.session_state.is_processing, max_chars=300,
+                                        help="Enter the URL of the Git repository to clone.")
             with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                 analysis = st.multiselect("Select analysis which you want to perform",
                                           ["complete",
@@ -23,8 +24,10 @@ class GitOpsAgentUI(StreamlitUIManager):
                                            "programming language",
                                            "repository structure",
                                            "contributor stats"
-                                           ])
-                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0)
+                                           ],
+                                          help="Select the type of analysis you want to perform on the Git repository.")
+                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0,
+                               help="Select the format for the report output.")
 
             user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
 

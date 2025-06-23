@@ -5,6 +5,7 @@ from client.ui.git_ops_agent_ui import GitOpsAgentUI
 from client.ui.name_lookup_agent_ui import NameLookupAgentUI
 from client.ui.release_manager_agent_ui import ReleaseManagerAgentUI
 from client.ui.ui_manager import StreamlitUIManager
+from client.ui.devops_gpt_agent import DevOpsGPTAgentUI
 
 
 class UIFactory:
@@ -19,5 +20,7 @@ class UIFactory:
             return GitOpsAgentUI(agent_manager)
         elif agent_name == "devops-code-remediation-agent":
             return CodeRemediationAgentUI(agent_manager)
+        elif agent_name == "devops-lookup-agent":
+            return DevOpsGPTAgentUI(agent_manager)
         else:
             return StreamlitUIManager(agent_manager)

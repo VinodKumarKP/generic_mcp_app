@@ -11,8 +11,8 @@ agent:
       Provide the giturl and branch of the repository to be scanned. This agent will scan the repository and provide the results.
   name-lookup:
     model:
-      temperature: 0.0
-      max_tokens: 100
+      temperature: 0.3
+      max_tokens: 1000
     name: Name Lookup
     type: mcp
     order: 5

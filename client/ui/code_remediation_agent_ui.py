@@ -18,7 +18,8 @@ class CodeRemediationAgentUI(StreamlitUIManager):
             project_url = st.text_input("Project URL",
                                         placeholder="Enter the Git repository URL" if not st.session_state.is_processing else "Processing... Please wait",
                                         disabled=st.session_state.is_processing,
-                                        max_chars=300)
+                                        max_chars=300,
+                                        help="Enter the URL of the Git repository to analyze and remediate code issues.")
             with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                 analysis = st.multiselect("Select analysis which you want to perform",
                                           ["code issues",
@@ -27,12 +28,17 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                                            "test coverage",
                                            "documentation",
                                            "code review"
-                                           ])
+                                           ],
+                                          help="Select the type of analysis you want to perform on the codebase.")
                 output = st.radio("Select output",
-                                  ["result only without remediated code", "result with remediated code"], index=0)
-                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0)
+                                  ["result only without remediated code", "result with remediated code"],
+                                  index=0,
+                                  help="Select whether you want the results only or the results along with the remediated code.")
+                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0,
+                               help="Select the format for the report output.")
                 additional_instructions = st.text_input("Additional instructions (Max 300 chars)",
-                                                        placeholder="Enter additional prompt", max_chars=300)
+                                                        placeholder="Enter additional prompt", max_chars=300,
+                                                        help="Enter any additional instructions or requirements for the analysis or remediation.")
 
             try:
                 user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
