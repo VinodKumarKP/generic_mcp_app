@@ -3,7 +3,7 @@ import os
 from typing import Dict
 
 import streamlit as st
-from manager.agent_manager import AgentManager
+from client.manager.agent_manager import AgentManager
 
 from utils.constants import Constants
 

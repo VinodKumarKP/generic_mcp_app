@@ -1,4 +1,4 @@
-from manager.agent_manager import AgentManager
+from client.manager.agent_manager import AgentManager
 
 from client.ui.code_remediation_agent_ui import CodeRemediationAgentUI
 from client.ui.git_ops_agent_ui import GitOpsAgentUI

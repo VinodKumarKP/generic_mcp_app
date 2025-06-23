@@ -2,17 +2,21 @@ import argparse
 import datetime
 import logging
 import os
+import sys
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableConfig
 
+root_directory = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(root_directory)
+
 from client.ui.ui_factory import UIFactory
 from client.ui.ui_manager import StreamlitUIManager
-from manager.agent_manager import AgentManager
-from manager.aws_client_manager import AWSClientManager
-from manager.config_manager import ConfigManager
-from manager.session_manager import SessionManager
+from client.manager.agent_manager import AgentManager
+from client.manager.aws_client_manager import AWSClientManager
+from client.manager.config_manager import ConfigManager
+from client.manager.session_manager import SessionManager
 from utils.async_utils import run_async
 from utils.constants import Constants
 

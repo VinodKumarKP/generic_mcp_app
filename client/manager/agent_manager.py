@@ -2,9 +2,9 @@ import streamlit as st
 from langchain_aws import ChatBedrock
 from langchain_aws.agents.base import BedrockAgentsRunnable
 from langgraph.prebuilt import create_react_agent
-from manager.aws_client_manager import AWSClientManager
-from manager.mcp_manager import MCPClient
-from manager.session_manager import SessionManager
+from client.manager.aws_client_manager import AWSClientManager
+from client.manager.mcp_manager import MCPClient
+from client.manager.session_manager import SessionManager
 
 from utils.constants import Constants
 
