@@ -49,3 +49,15 @@ class SessionManager:
 
         if 'model' not in st.session_state:
             st.session_state.model = None
+
+        if 'model_temperature' not in st.session_state:
+            st.session_state.model_temperature = 0.0
+
+        if 'previous_model_temperature' not in st.session_state:
+            st.session_state.previous_model_temperature = 0.0
+
+        if 'model_max_token' not in st.session_state:
+            st.session_state.model_max_token = 1000
+
+        if 'previous_model_max_token' not in st.session_state:
+            st.session_state.previous_model_max_token = 1000

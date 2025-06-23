@@ -30,11 +30,16 @@ class ChatApp:
 
         self.ui_manager = UIFactory().create_ui_manager(agent_name=agent_key, agent_manager=self.agent_manager)
 
-        if st.session_state.previous_agent_key != agent_key:
-            st.session_state.conversation_history = {}
-            st.session_state.tool_executions = {}
-            st.session_state.tool_execution_count = 0
+        if st.session_state.previous_agent_key != agent_key or \
+                st.session_state.previous_model_temperature != st.session_state.model_temperature or \
+                   st.session_state.previous_model_max_token != st.session_state.model_max_token:
+            st.session_state.agent = None
+            st.session_state.model = None
+            st.session_state.conversation_history = {} if st.session_state.previous_agent_key != agent_key else st.session_state.conversation_history
+            st.session_state.tool_executions = {} if st.session_state.previous_agent_key != agent_key else st.session_state.tool_executions
+            st.session_state.tool_execution_count = 0 if st.session_state.previous_agent_key != agent_key else st.session_state.tool_execution_count
             st.session_state.previous_agent_key = agent_key
+            self.session_manager.initialize_state()
             run_async(self.agent_manager.initialize_agent(agent_key=agent_key,
                                                           config=self.config_manager.config['agent'][agent_key],
                                                           global_model_config=self.config_manager.config['model']))
@@ -43,7 +48,8 @@ class ChatApp:
             run_async(self.agent_manager.initialize_agent(config=self.config_manager.config['agent'][agent_key],
                                                           global_model_config=self.config_manager.config['model']))
 
-        self.ui_manager.initialize_sidebar_widgets()
+        self.ui_manager.initialize_sidebar_widgets(config=self.config_manager.config['agent'][agent_key],
+                                                          global_model_config=self.config_manager.config['model'])
         user_text, messages_container, progress_container = self.ui_manager.initialize_user_interface()
 
         prompt_list = []

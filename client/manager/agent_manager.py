@@ -96,6 +96,8 @@ class AgentManager:
             global_model_config = {}
         try:
             global_model_config.update(config.get('model', {}))
+            global_model_config['temperature'] = st.session_state.model_temperature
+            global_model_config['max_tokens'] = st.session_state.model_max_token
             st.session_state.model = global_model_config
             llm = self.create_llm_model(**global_model_config)
         except Exception as e:

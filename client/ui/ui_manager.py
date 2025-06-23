@@ -56,13 +56,20 @@ class StreamlitUIManager:
 
         return agent_name, agent_key, agent_type
 
-    def model_info_container(self):
+    def model_info_container(self, config, global_model_config):
         if st.session_state.model:
             with st.sidebar:
                 st.divider()
-                with st.expander(f"Model Details", expanded=False):
-                    for k, v in st.session_state.model.items():
-                        st.markdown(f"{k}: {v}")
+                with st.sidebar.expander("⚙️  Basic config", expanded=False):
+                    st.session_state.previous_model_max_token = st.session_state.model_max_token
+                    st.session_state.model_max_token = st.number_input("Max tokens",
+                                                           min_value=10,
+                                                           max_value=10240,
+                                                           value=config.get('model', {}).get('max_tokens', global_model_config.get('max_tokens', 4096)),
+                                                           step=512, )
+                    st.session_state.previous_model_temperature = st.session_state.model_temperature
+                    st.session_state.model_temperature = st.slider("Temperature", 0.0, 1.0, step=0.05,
+                                                                   value=config.get('model', {}).get('temperature', global_model_config.get('temperature', 1.0)))
 
     def server_info_container(self):
         if st.session_state.server:
@@ -137,7 +144,7 @@ class StreamlitUIManager:
 
         return user_text, messages_container, progress_container
 
-    def initialize_sidebar_widgets(self):
-        self.model_info_container()
+    def initialize_sidebar_widgets(self, config: Dict, global_model_config: Dict):
+        self.model_info_container(config=config, global_model_config=global_model_config)
         self.server_info_container()
         self.tool_info_container()

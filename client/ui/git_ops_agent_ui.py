@@ -12,7 +12,7 @@ class GitOpsAgentUI(StreamlitUIManager):
             project_url = st.text_input("Project URL", placeholder="Enter the Git repository URL",
                                         disabled=st.session_state.is_processing)
             with st.expander("Advanced options"):
-                fmt = st.multiselect("Select analysis",
+                analysis = st.multiselect("Select analysis",
                                      ["complete",
                                       "commit history",
                                       "file list ",
@@ -20,11 +20,14 @@ class GitOpsAgentUI(StreamlitUIManager):
                                       "repository structure",
                                       "contributor stats"
                                       ])
+                fmt = st.radio("Select output format", ["html", "markdown", "json", "text", "tabular"], index=0)
+
 
             user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
             if user_text:
                 user_text = f"Clone the project {project_url} and provide " + (
-                    f" the following analysis {fmt}" if len(fmt) > 0 else "complete analysis")
+                    f" the following analysis {analysis}" if len(analysis) > 0 else "complete analysis") + \
+                            f" and provide the results in {fmt} format. "
 
         messages_container = st.container(border=True, height=600)
         progress_container = st.expander("Progress", expanded=False)
