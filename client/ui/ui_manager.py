@@ -31,10 +31,13 @@ class StreamlitUIManager:
 
         option_list = {}
         option_list.update(
-            {values['name']: f"{key}:{values['name']}:{values['type']}" for key, values in config['agent'].items() if
+            {values['name']: f"{key}:{values['name']}:{values['type']}:{values.get('order', 100)}" for key, values in
+             config['agent'].items() if
              values['type'] == 'mcp'})
-        option_list.update({values['name']: f"{key}:{agent}:{values['type']}"
+        option_list.update({values['name']: f"{key}:{agent}:{values['type']}:{values.get('order', 100)}"
                             for agent in agent_list for key, values in config['agent'].items() if key in agent})
+
+        option_list = dict(sorted(option_list.items(), key=lambda item: int(item[1].split(":")[-1])))
 
         with st.sidebar:
             st.subheader("Settings")
@@ -63,13 +66,19 @@ class StreamlitUIManager:
                 with st.sidebar.expander("⚙️  Basic config", expanded=False):
                     st.session_state.previous_model_max_token = st.session_state.model_max_token
                     st.session_state.model_max_token = st.number_input("Max tokens",
-                                                           min_value=10,
-                                                           max_value=10240,
-                                                           value=config.get('model', {}).get('max_tokens', global_model_config.get('max_tokens', 4096)),
-                                                           step=512, )
+                                                                       min_value=10,
+                                                                       max_value=10240,
+                                                                       value=config.get('model', {}).get('max_tokens',
+                                                                                                         global_model_config.get(
+                                                                                                             'max_tokens',
+                                                                                                             4096)),
+                                                                       step=512, )
                     st.session_state.previous_model_temperature = st.session_state.model_temperature
                     st.session_state.model_temperature = st.slider("Temperature", 0.0, 1.0, step=0.05,
-                                                                   value=config.get('model', {}).get('temperature', global_model_config.get('temperature', 1.0)))
+                                                                   value=config.get('model', {}).get('temperature',
+                                                                                                     global_model_config.get(
+                                                                                                         'temperature',
+                                                                                                         1.0)))
 
     def server_info_container(self):
         if st.session_state.server:

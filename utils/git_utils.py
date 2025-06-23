@@ -1,11 +1,13 @@
 import logging
 import os
+import re
 import shutil
 import tempfile
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from urllib.parse import urlparse
 
 # import nest_asyncio  # Added import
 from git import Repo
@@ -82,6 +84,26 @@ LANGUAGE_EXTENSIONS = {
 
 
 class GitUtils:
+    def validate_git_url(self, git_url: str) -> bool:
+        """
+        Validate Git repository URL for security.
+
+        Args:
+            git_url: URL to validate
+
+        Returns:
+            bool: Whether the URL is valid
+        """
+        try:
+            result = urlparse(git_url)
+            # Check for valid schemes and basic structure
+            return all([
+                result.scheme in ['https', 'git', 'ssh'],
+                result.netloc,  # Ensure there's a domain
+                any(domain in result.netloc for domain in ['github.com', 'gitlab.com', 'bitbucket.org'])
+            ])
+        except Exception:
+            return False
 
     def clone_repository(self, git_url: str, branch: str = "main") -> str:
         """
@@ -97,11 +119,19 @@ class GitUtils:
         Raises:
             GitHubError: If cloning fails
         """
+
+        # Validate URL first
+        if not self.validate_git_url(git_url):
+            raise GitHubError("Invalid or potentially malicious repository URL")
+
         temp_dir = tempfile.mkdtemp()
         logger.info(f"Cloning {git_url} (branch: {branch}) to {temp_dir}...")
 
         try:
             # Use GitPython to clone the repository
+            masked_url = re.sub(r'://.*@', '://[REDACTED]@', git_url)
+            logger.info(f"Cloning repository (branch: {branch})...")
+
             repo = Repo.clone_from(git_url, temp_dir)
 
             # Try to checkout the specified branch, fallback to master if main doesn't exist
@@ -123,7 +153,7 @@ class GitUtils:
             if os.path.exists(temp_dir):
                 shutil.rmtree(temp_dir, ignore_errors=True)
             logger.error(f"Error cloning repository: {str(e)}")
-            raise GitHubError(f"Failed to clone repository: {str(e)}") from e
+            raise GitHubError("Repository cloning failed. Please check the URL and try again.") from e
 
     def get_file_list_helper(self, repo_path: str) -> List[str]:
         """
@@ -535,6 +565,11 @@ class GitUtils:
             bool: True if successful, False otherwise
         """
         try:
+            # Additional safety checks before deletion
+            if not repo_path or not os.path.isabs(repo_path):
+                logger.warning("Invalid repository path for cleanup")
+                return False
+
             if os.path.exists(repo_path):
                 shutil.rmtree(repo_path, ignore_errors=True)
                 logger.info(f"Successfully cleaned up repository at {repo_path}")

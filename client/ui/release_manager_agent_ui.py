@@ -1,3 +1,5 @@
+import time
+
 import streamlit as st
 from typing_extensions import override
 
@@ -24,11 +26,23 @@ class ReleaseManagerAgentUI(StreamlitUIManager):
                                                         placeholder="Enter additional prompt")
 
             user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
-            if user_text:
-                user_text = f"Analyze the project {project_url} and provide " + (
-                    f" {analysis} analysis of the report" if len(analysis) > 0 else "summary") + \
-                            f" and provide the results in {fmt} format. " + \
-                            f" {additional_instructions}"
-                prompt_list.append(user_text)
+            try:
+                if user_text:
+                    if project_url:
+                        user_text = f"Analyze the project {project_url} and provide " + (
+                            f" {analysis} analysis of the report" if len(analysis) > 0 else "summary") + \
+                                    f" and provide the results in {fmt} format. " + \
+                                    f" {additional_instructions}"
+                        prompt_list.append(user_text)
+                    else:
+                        st.error("Please enter a valid project URL.")
+                        st.session_state.is_processing = False
+                        time.sleep(3)
+                        st.rerun()
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
+                st.session_state.is_processing = False
+                time.sleep(3)
+                st.rerun()
 
         return prompt_list, messages_container, progress_container

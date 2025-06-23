@@ -4,6 +4,9 @@ from langchain_aws.agents.base import BedrockAgentsRunnable
 from langgraph.prebuilt import create_react_agent
 from manager.aws_client_manager import AWSClientManager
 from manager.mcp_manager import MCPClient
+from manager.session_manager import SessionManager
+
+from utils.constants import Constants
 
 
 class AgentManager:
@@ -96,8 +99,10 @@ class AgentManager:
             global_model_config = {}
         try:
             global_model_config.update(config.get('model', {}))
-            global_model_config['temperature'] = st.session_state.model_temperature
-            global_model_config['max_tokens'] = st.session_state.model_max_token
+            global_model_config['temperature'] = SessionManager.validate_session_state('model_temperature',
+                                                                                       Constants.DEFAULT_TEMPERATURE)
+            global_model_config['max_tokens'] = SessionManager.validate_session_state('model_max_token',
+                                                                                      Constants.DEFAULT_MAX_TOKENS)
             st.session_state.model = global_model_config
             llm = self.create_llm_model(**global_model_config)
         except Exception as e:

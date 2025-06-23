@@ -9,7 +9,7 @@ class AWSClientManager:
     Manages AWS client connections for Bedrock services.
     """
 
-    def __init__(self):
+    def __init__(self, read_timeout=1000):
         """
         Initialize AWS client connections with appropriate configuration.
 
@@ -23,7 +23,7 @@ class AWSClientManager:
             EnvironmentError: If the 'AWS_REGION' environment variable is not set.
         """
 
-        self.boto3_config = Config(read_timeout=1000)
+        self.boto3_config = Config(read_timeout=read_timeout)
         self.region = os.environ.get('AWS_REGION', 'us-east-2')
         if not self.region:
             raise EnvironmentError("AWS_REGION environment variable is not set")

@@ -6,24 +6,17 @@ agent:
   devops-code-remediation-agent:
     name: DevOps Code Remediation
     type: bedrock
+    order: 1
     instructions: |
       ## Instructions
       Provide the giturl and branch of the repository to be scanned. This agent will scan the repository and provide the results.
-
-      ## Sample Prompt
-      - Help me analyze the git url <<giturl>> and branch <<branch>> of the repository <<repository_name>> for any code issues.
-        - Example: "Help me analyze the git url https://github.com/example/project.git and branch main of the repository project-name for any code issues."
-      - Provide me coding best practice in <<programming language>>
-        - Example: "Provide me coding best practice in Python."
-        - Example: "Provide me coding best practice in JavaScript."
-      - Help me analyze the git url <<giturl>> and branch <<branch>> of the repository <<repository_name>> for any code issues and provide me remediated code.
-        - Example: "Help me analyze the git url https://github.com/example/webapp.git and branch development of the repository webapp for any code issues and provide me remediated code."
   name-lookup:
     model:
       temperature: 0.0
       max_tokens: 100
     name: Name Lookup
     type: mcp
+    order: 5
     enable_memory: true
     instructions: |
       ## Instructions
@@ -60,6 +53,7 @@ agent:
   deployment-release-manager-agent:
     name: Deployment Release Manager
     type: mcp
+    order: 2
     instructions: |
       ## Instructions
       Analyze the code scan result of the provided project and summarize the results. Based on that analysis, provide a list of recommended actions 
@@ -93,6 +87,7 @@ agent:
   git-ops-agent:
     name: Git Ops
     type: mcp
+    order: 3
     instructions: |
       ## Instructions
       Provide the giturl and the agent will clone the repository and can provide the following statistics:
@@ -116,15 +111,18 @@ agent:
     system_prompt: |
       You are a helpful assistant with access to git utilities. Format the output in a way that is easy to read and understand.
       Always provide clear responses.
-  general-purpose-agent:
+  devops-lookup-agent:
     model:
       model_id: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0'
       temperature: 0.0
       max_tokens: 8000
-    name: General Purpose Agent
+    name: DevOpsGPT
     type: mcp
+    order: 4
     instructions: |
       ## Instructions
-      This agent can answer general questions and provide information on a wide range of topics.
+      This agent can answer general questions and provide information on a wide range of devops and software engineering topics.
     system_prompt: |
-      You are a helpful assistant who can answer general questions and provide information on a wide range of topics.
+      You are a helpful assistant who can answer general questions and provide information on a wide range of devops and software engineering topics.
+      Keep the topics relevant to devops and software engineering. Do  not provide information on topics that are not relevant to devops and software engineering.
+      Always provide clear responses.

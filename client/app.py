@@ -1,4 +1,7 @@
+import argparse
 import datetime
+import logging
+import os
 
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
@@ -13,9 +16,24 @@ from manager.session_manager import SessionManager
 from utils.async_utils import run_async
 from utils.constants import Constants
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 class ChatApp:
     def __init__(self, config_file="sidebar.yaml"):
+        # Use a secure default configuration path
+        default_config_path = os.path.join(
+            os.path.dirname(__file__),
+            'config',
+            'sidebar.yaml'
+        )
+
+
         self.config_manager = ConfigManager(config_file=config_file)
         self.session_manager = SessionManager()
         self.aws_manager = AWSClientManager()
@@ -129,79 +147,95 @@ class ChatApp:
             st.markdown(response.messages[0].content, unsafe_allow_html=True)
 
     async def stream_messages(self, user_text, messages_container=None, progress_container=None):
-        async for chunk in st.session_state.agent.astream(
-                {"messages": user_text},
-                stream_mode="values",
-                config={"configurable": {"thread_id": st.session_state.session_id}}
-        ):
-            with messages_container:
-                tool_count = 0
-                for msg in chunk['messages']:
-                    if hasattr(msg, 'tool_calls') and msg.tool_calls:
-                        for tool_call in msg.tool_calls:
-                            # Find corresponding ToolMessage
-                            tool_output = next(
-                                (m.content for m in chunk["messages"]
-                                 if isinstance(m, ToolMessage) and
-                                 m.tool_call_id == tool_call['id']),
-                                None
-                            )
-                            if tool_output:
-                                tool_name = tool_call['name']
-                                tool_config = {
-                                    "input": tool_call['args'],
-                                    "output": tool_output,
-                                    "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                }
-                                st.session_state.tool_executions.update({
-                                    tool_name: tool_config
-                                })
-                                previous_count = st.session_state.tool_execution_count
-                                current_count = len(st.session_state.tool_executions)
-                                if previous_count != current_count:
-                                    st.session_state.tool_execution_count = current_count
-                                    with progress_container:
-                                        self.ui_manager.display_tool(tool_name=tool_name,
-                                                                     tool_config=tool_config,
-                                                                     execution_index=current_count)
+        try:
+            async for chunk in st.session_state.agent.astream(
+                    {"messages": user_text},
+                    stream_mode="values",
+                    config={"configurable": {"thread_id": st.session_state.session_id}}
+            ):
+                with messages_container:
+                    tool_count = 0
+                    for msg in chunk['messages']:
+                        if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                            for tool_call in msg.tool_calls:
+                                # Find corresponding ToolMessage
+                                tool_output = next(
+                                    (m.content for m in chunk["messages"]
+                                     if isinstance(m, ToolMessage) and
+                                     m.tool_call_id == tool_call['id']),
+                                    None
+                                )
+                                if tool_output:
+                                    tool_name = tool_call['name']
+                                    tool_config = {
+                                        "input": tool_call['args'],
+                                        "output": tool_output,
+                                        "timestamp": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                    }
+                                    st.session_state.tool_executions.update({
+                                        tool_name: tool_config
+                                    })
+                                    previous_count = st.session_state.tool_execution_count
+                                    current_count = len(st.session_state.tool_executions)
+                                    if previous_count != current_count:
+                                        st.session_state.tool_execution_count = current_count
+                                        with progress_container:
+                                            self.ui_manager.display_tool(tool_name=tool_name,
+                                                                         tool_config=tool_config,
+                                                                         execution_index=current_count)
 
-                    if isinstance(msg, HumanMessage):
-                        continue  # Skip human messages
-                    if isinstance(msg, AIMessage):
-                        stop_reason = None
-                        if hasattr(msg, "response_metadata") and msg.response_metadata:
-                            stop_reason = msg.response_metadata.get('stop_reason', None)
-                        tool_id = msg.id
-                        if hasattr(msg, "content") and msg.content and stop_reason in ["end_turn", "max_tokens",
-                                                                                       "tool_use"]:
-                            if isinstance(msg.content, list) and len(msg.content) > 0:
-                                content = str(msg.content[0].get('text', '')).strip()
-                            else:
-                                content = str(msg.content).strip()
+                        if isinstance(msg, HumanMessage):
+                            continue  # Skip human messages
+                        if isinstance(msg, AIMessage):
+                            stop_reason = None
+                            if hasattr(msg, "response_metadata") and msg.response_metadata:
+                                stop_reason = msg.response_metadata.get('stop_reason', None)
+                            tool_id = msg.id
+                            if hasattr(msg, "content") and msg.content and stop_reason in ["end_turn", "max_tokens",
+                                                                                           "tool_use"]:
+                                if isinstance(msg.content, list) and len(msg.content) > 0:
+                                    content = str(msg.content[0].get('text', '')).strip()
+                                else:
+                                    content = str(msg.content).strip()
 
-                            if tool_id and tool_id not in st.session_state.tool_execution_run_id_list:
-                                if len(content) > 0:
-                                    with messages_container.chat_message("assistant",
-                                                                         avatar=Constants.ASSISTANT_AVATAR):
-                                        st.session_state.tool_execution_run_id_list.append(tool_id)
-                                        if len(content) > 0:
-                                            st.session_state.conversation_history[st.session_state.user_id].append(
-                                                {"role": "assistant", "content": content}
-                                            )
-                                            st.markdown(content, unsafe_allow_html=True)
+                                if tool_id and tool_id not in st.session_state.tool_execution_run_id_list:
+                                    if len(content) > 0:
+                                        with messages_container.chat_message("assistant",
+                                                                             avatar=Constants.ASSISTANT_AVATAR):
+                                            st.session_state.tool_execution_run_id_list.append(tool_id)
+                                            if len(content) > 0:
+                                                st.session_state.conversation_history[st.session_state.user_id].append(
+                                                    {"role": "assistant", "content": content}
+                                                )
+                                                st.markdown(content, unsafe_allow_html=True)
+        except Exception as e:
+            logger.error(f"Stream messages error: {e}")
+            st.error(f"Error processing messages: {e}")
 
     def run(self):
-        self.chat_interface()
+        try:
+            self.chat_interface()
+        except Exception as e:
+            logger.error(f"Application run error: {e}")
+            st.error(f"Critical application error: {e}")
 
 
-def argument_parser():
-    import argparse
-    parser = argparse.ArgumentParser(description="Chat Application")
-    parser.add_argument("--config_file", type=str, help="Path to the configuration file")
+def argument_parser() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Secure Chat Application")
+    parser.add_argument(
+        "--config_file",
+        type=str,
+        help="Path to the configuration file",
+        default=None
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    args = argument_parser()
-    app = ChatApp(config_file=args.config_file)
-    app.run()
+    try:
+        args = argument_parser()
+        app = ChatApp(config_file=args.config_file)
+        app.run()
+    except Exception as e:
+        logging.error(f"Startup error: {e}")
+        print(f"Failed to start application: {e}")
