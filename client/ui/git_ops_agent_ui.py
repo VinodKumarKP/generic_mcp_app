@@ -12,9 +12,10 @@ class GitOpsAgentUI(StreamlitUIManager):
     @override
     def initialize_user_interface(self):
         with st.form(key="user_input_form", clear_on_submit=True):
-            project_url = st.text_input("Project URL", placeholder="Enter the Git repository URL",
+            project_url = st.text_input("Project URL",
+                                        placeholder="Enter the Git repository URL" if not st.session_state.is_processing else "Processing... Please wait",
                                         disabled=st.session_state.is_processing, max_chars=300)
-            with st.expander("Advanced options"):
+            with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                 analysis = st.multiselect("Select analysis",
                                           ["complete",
                                            "commit history",

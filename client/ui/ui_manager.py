@@ -145,7 +145,8 @@ class StreamlitUIManager:
         user_text = st.chat_input(
             "Enter your prompt here" if not st.session_state.is_processing else "Processing... Please wait",
             disabled=st.session_state.is_processing,
-            key="chat_input"
+            key="chat_input",
+            max_chars=100
         )
 
         messages_container = st.container(border=True, height=600)

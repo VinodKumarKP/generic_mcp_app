@@ -14,9 +14,10 @@ class ReleaseManagerAgentUI(StreamlitUIManager):
         messages_container = st.container(border=True, height=600)
         progress_container = st.expander("Progress", expanded=False)
         with (st.form(key="user_input_form", clear_on_submit=True)):
-            project_url = st.text_input("Project Name", placeholder="Enter the Project Name",
+            project_url = st.text_input("Project Name",
+                                        placeholder="Enter the Project Name" if not st.session_state.is_processing else "Processing... Please wait",
                                         disabled=st.session_state.is_processing)
-            with st.expander("Advanced options"):
+            with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                 analysis = st.radio("Select analysis",
                                     ["summary",
                                      "detailed"

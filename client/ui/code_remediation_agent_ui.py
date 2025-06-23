@@ -15,10 +15,11 @@ class CodeRemediationAgentUI(StreamlitUIManager):
         messages_container = st.container(border=True, height=600)
         progress_container = st.expander("Progress", expanded=False)
         with (st.form(key="user_input_form", clear_on_submit=True)):
-            project_url = st.text_input("Project URL", placeholder="Enter the Git repository URL",
+            project_url = st.text_input("Project URL",
+                                        placeholder="Enter the Git repository URL" if not st.session_state.is_processing else "Processing... Please wait",
                                         disabled=st.session_state.is_processing,
                                         max_chars=300)
-            with st.expander("Advanced options"):
+            with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                 analysis = st.multiselect("Select analysis",
                                           ["code issues",
                                            "security analysis",
@@ -27,7 +28,8 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                                            "documentation",
                                            "code review"
                                            ])
-                output = st.radio("Select output", ["result only without remediated code", "result with remediated code"], index=0)
+                output = st.radio("Select output",
+                                  ["result only without remediated code", "result with remediated code"], index=0)
                 fmt = st.radio("Select output format", ["html", "markdown", "json", "text", "tabular"], index=0)
 
             try:
