@@ -8,7 +8,6 @@ agent:
     type: bedrock
     order: 1
     instructions: |
-      ## Instructions
       Provide the giturl and branch of the repository to be scanned. This agent will scan the repository and provide the results.
   name-lookup:
     model:
@@ -19,17 +18,13 @@ agent:
     order: 5
     enable_memory: true
     instructions: |
-      ## Instructions
-      Provide the name of the person to lookup. This agent will provide the results.
-      If the available tools does not solve the query, then use bedrock to get the answer.
-      
-      ## Sample Prompts
-      - What is the phone number of <<name>>?
-        - Example: "What is the phone number of John Doe?"
-      - What is the email address of <<name>>?
-        - Example: "What is the email address of Jane Smith?"
-      - What is the address of <<name>>?
-        - Example: "What is the address of Bob Johnson?"
+      It will lookup the name using the surname and provide the results. 
+      It can also format the results in the following formats:
+      - uppercase
+      - lowercase
+      - titlecase
+      - capitalize
+
     servers: [
       {
         'name': 'name_lookup_server',
@@ -55,7 +50,6 @@ agent:
     type: mcp
     order: 2
     instructions: |
-      ## Instructions
       Analyze the code scan result of the provided project and summarize the results. Based on that analysis, provide a list of recommended actions 
       and also indicate whether the project is ready for deployment or not.
       
@@ -89,7 +83,6 @@ agent:
     type: mcp
     order: 3
     instructions: |
-      ## Instructions
       Provide the giturl and the agent will clone the repository and can provide the following statistics:
         - commit history
         - file list
@@ -120,7 +113,6 @@ agent:
     type: mcp
     order: 4
     instructions: |
-      ## Instructions
       This agent can answer general questions and provide information on a wide range of devops and software engineering topics.
     system_prompt: |
       You are a helpful assistant who can answer general questions and provide information on a wide range of devops and software engineering topics.
