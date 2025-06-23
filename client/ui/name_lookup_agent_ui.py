@@ -17,8 +17,8 @@ class NameLookupAgentUI(StreamlitUIManager):
                 surname = st.text_input("Enter surname", disabled=st.session_state.is_processing, max_chars=20)
                 with st.expander("Advanced options", expanded=not st.session_state.is_processing):
                     fmt = st.radio("Select format", ["none", "uppercase", "lowercase", "titlecase", "capitalize"], )
-                    additional_instructions = st.text_input("Additional instructions",
-                                                            placeholder="Enter additional prompt")
+                    additional_instructions = st.text_input("Additional instructions (Max 300 chars)",
+                                                            placeholder="Enter additional prompt", max_chars=300)
 
                 user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
                 if user_text:

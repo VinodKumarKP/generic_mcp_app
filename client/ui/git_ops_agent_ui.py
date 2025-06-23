@@ -16,7 +16,7 @@ class GitOpsAgentUI(StreamlitUIManager):
                                         placeholder="Enter the Git repository URL" if not st.session_state.is_processing else "Processing... Please wait",
                                         disabled=st.session_state.is_processing, max_chars=300)
             with st.expander("Advanced options", expanded=not st.session_state.is_processing):
-                analysis = st.multiselect("Select analysis",
+                analysis = st.multiselect("Select analysis which you want to perform",
                                           ["complete",
                                            "commit history",
                                            "file list ",
@@ -24,7 +24,7 @@ class GitOpsAgentUI(StreamlitUIManager):
                                            "repository structure",
                                            "contributor stats"
                                            ])
-                fmt = st.radio("Select output format", ["html", "markdown", "json", "text", "tabular"], index=0)
+                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0)
 
             user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
 

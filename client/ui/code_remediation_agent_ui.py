@@ -20,7 +20,7 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                                         disabled=st.session_state.is_processing,
                                         max_chars=300)
             with st.expander("Advanced options", expanded=not st.session_state.is_processing):
-                analysis = st.multiselect("Select analysis",
+                analysis = st.multiselect("Select analysis which you want to perform",
                                           ["code issues",
                                            "security analysis",
                                            "performance analysis",
@@ -30,7 +30,9 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                                            ])
                 output = st.radio("Select output",
                                   ["result only without remediated code", "result with remediated code"], index=0)
-                fmt = st.radio("Select output format", ["html", "markdown", "json", "text", "tabular"], index=0)
+                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0)
+                additional_instructions = st.text_input("Additional instructions (Max 300 chars)",
+                                                        placeholder="Enter additional prompt", max_chars=300)
 
             try:
                 user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)
@@ -41,7 +43,8 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                     if project_url:
                         user_text = f"Analyze the project {project_url} and provide " + (
                             f" the following analysis {analysis}" if len(analysis) > 0 else "code remediation") + \
-                                    f" and provide the results in {fmt} format and {output}."
+                                    f" and provide the results in {fmt} format and {output}." + \
+                                    f" {additional_instructions}"
                         prompt_list.append(user_text)
                         prompt_list.append(
                             "Please provide the s3 bucket url of the report")
