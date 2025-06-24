@@ -9,11 +9,6 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any
 
-from fastmcp import FastMCP
-
-# Initialize FastMCP
-mcp = FastMCP("Security Scan Results Server")
-
 
 def generate_random_severity():
     """Generate random severity level"""
@@ -32,7 +27,7 @@ def generate_random_date(days_back=30):
     return (base_date - timedelta(days=random_days)).isoformat()
 
 
-def _get_sonar_scan_results_impl(project_key: str = "default-project") -> Dict[str, Any]:
+def get_sonar_scan_results_impl(project_key: str = "default-project") -> Dict[str, Any]:
     """
     Internal implementation for SonarQube scan results.
     """
@@ -118,7 +113,7 @@ def _get_sonar_scan_results_impl(project_key: str = "default-project") -> Dict[s
     }
 
 
-def _get_fortify_scan_results_impl(application_name: str = "default-app") -> Dict[str, Any]:
+def get_fortify_scan_results_impl(application_name: str = "default-app") -> Dict[str, Any]:
     """
     Internal implementation for Fortify scan results.
     """
@@ -196,7 +191,7 @@ def _get_fortify_scan_results_impl(application_name: str = "default-app") -> Dic
     }
 
 
-def _get_nexus_scan_results_impl(repository_name: str = "default-repo") -> Dict[str, Any]:
+def get_nexus_scan_results_impl(repository_name: str = "default-repo") -> Dict[str, Any]:
     """
     Internal implementation for Nexus IQ scan results.
     """
@@ -313,49 +308,6 @@ def _get_nexus_scan_results_impl(repository_name: str = "default-repo") -> Dict[
     }
 
 
-@mcp.tool()
-def get_sonar_scan_results(project_key: str = "default-project") -> Dict[str, Any]:
-    """
-    Collect SonarQube scan results for code quality and security analysis.
-
-    Args:
-        project_key: The project identifier in SonarQube
-
-    Returns:
-        Dictionary containing SonarQube scan results
-    """
-    return _get_sonar_scan_results_impl(project_key)
-
-
-@mcp.tool()
-def get_fortify_scan_results(application_name: str = "default-app") -> Dict[str, Any]:
-    """
-    Collect Fortify Static Code Analyzer (SCA) scan results for security vulnerabilities.
-
-    Args:
-        application_name: The application name in Fortify
-
-    Returns:
-        Dictionary containing Fortify scan results
-    """
-    return _get_fortify_scan_results_impl(application_name)
-
-
-@mcp.tool()
-def get_nexus_scan_results(repository_name: str = "default-repo") -> Dict[str, Any]:
-    """
-    Collect Nexus IQ scan results for open source component vulnerabilities and license compliance.
-
-    Args:
-        repository_name: The repository name in Nexus IQ
-
-    Returns:
-        Dictionary containing Nexus IQ scan results
-    """
-    return _get_nexus_scan_results_impl(repository_name)
-
-
-@mcp.tool()
 def get_all_scan_results(project_identifier: str = "default-project") -> Dict[str, Any]:
     """
     Collect scan results from all three security tools (Sonar, Fortify, Nexus) for a given project.
@@ -371,9 +323,9 @@ def get_all_scan_results(project_identifier: str = "default-project") -> Dict[st
     # Call the internal implementation functions in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         # Submit all three scan functions to run in parallel
-        sonar_future = executor.submit(_get_sonar_scan_results_impl, project_identifier)
-        fortify_future = executor.submit(_get_fortify_scan_results_impl, project_identifier)
-        nexus_future = executor.submit(_get_nexus_scan_results_impl, project_identifier)
+        sonar_future = executor.submit(get_sonar_scan_results_impl, project_identifier)
+        fortify_future = executor.submit(get_fortify_scan_results_impl, project_identifier)
+        nexus_future = executor.submit(get_nexus_scan_results_impl, project_identifier)
 
         # Wait for all results to complete
         sonar_results = sonar_future.result()
@@ -413,7 +365,3 @@ def get_all_scan_results(project_identifier: str = "default-project") -> Dict[st
             "Implement secure coding practices to prevent future issues"
         ]
     }
-
-
-if __name__ == "__main__":
-    mcp.run()

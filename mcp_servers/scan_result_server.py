@@ -3,16 +3,32 @@
 Security Scan Results MCP Server (Client)
 Fetches scan results from Flask API server and provides them via MCP tools
 """
+import os
+import sys
 
 import requests
 from typing import Dict, Any
 from fastmcp import FastMCP
+
+file_root = os.path.dirname(os.path.abspath(__file__))
+path_list = [
+    file_root,
+    os.path.dirname(file_root)
+]
+for path in path_list:
+    if path not in sys.path:
+        sys.path.append(path)
 
 # Initialize FastMCP
 mcp = FastMCP("Security Scan Results MCP Client")
 
 # Configuration
 FLASK_SERVER_BASE_URL = "http://localhost:5001"
+
+from utils.scan_results import (get_nexus_scan_results_impl,
+                                get_sonar_scan_results_impl,
+                                get_fortify_scan_results_impl,
+                                get_all_scan_results as get_all_scan_results_impl)
 
 
 def _make_api_request(endpoint: str, params: Dict[str, str] = None) -> Dict[str, Any]:
@@ -60,12 +76,7 @@ def get_sonar_scan_results(project_key: str = "default-project") -> Dict[str, An
     try:
         return _make_api_request("/api/scans/sonar", {"project_key": project_key})
     except Exception as e:
-        return {
-            "error": True,
-            "message": str(e),
-            "project_key": project_key,
-            "scan_type": "sonar"
-        }
+        return get_sonar_scan_results_impl(project_key=project_key)
 
 
 @mcp.tool()
@@ -82,12 +93,7 @@ def get_fortify_scan_results(application_name: str = "default-app") -> Dict[str,
     try:
         return _make_api_request("/api/scans/fortify", {"application_name": application_name})
     except Exception as e:
-        return {
-            "error": True,
-            "message": str(e),
-            "application_name": application_name,
-            "scan_type": "fortify"
-        }
+        return get_fortify_scan_results_impl(application_name=application_name)
 
 
 @mcp.tool()
@@ -104,12 +110,7 @@ def get_nexus_scan_results(repository_name: str = "default-repo") -> Dict[str, A
     try:
         return _make_api_request("/api/scans/nexus", {"repository_name": repository_name})
     except Exception as e:
-        return {
-            "error": True,
-            "message": str(e),
-            "repository_name": repository_name,
-            "scan_type": "nexus"
-        }
+        return get_nexus_scan_results_impl(repository_name=repository_name)
 
 
 @mcp.tool()
@@ -126,12 +127,7 @@ def get_all_scan_results(project_identifier: str = "default-project") -> Dict[st
     try:
         return _make_api_request("/api/scans/all", {"project_identifier": project_identifier})
     except Exception as e:
-        return {
-            "error": True,
-            "message": str(e),
-            "project_identifier": project_identifier,
-            "scan_type": "consolidated"
-        }
+        return get_all_scan_results_impl(project_identifier=project_identifier)
 
 
 @mcp.tool()
