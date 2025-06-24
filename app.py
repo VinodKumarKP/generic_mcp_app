@@ -235,7 +235,7 @@ def argument_parser() -> argparse.Namespace:
         "--config_file",
         type=str,
         help="Path to the configuration file",
-        default=None
+        default='sidebar.yaml'
     )
     return parser.parse_args()
 
