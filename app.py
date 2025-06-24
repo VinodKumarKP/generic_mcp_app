@@ -19,6 +19,7 @@ from client.manager.config_manager import ConfigManager
 from client.manager.session_manager import SessionManager
 from utils.async_utils import run_async
 from utils.constants import Constants
+from scan_server.flask_scan_server import app as flask_app
 
 # Configure logging
 logging.basicConfig(
@@ -238,7 +239,6 @@ def argument_parser() -> argparse.Namespace:
         default='sidebar.yaml'
     )
     return parser.parse_args()
-
 
 if __name__ == "__main__":
     try:

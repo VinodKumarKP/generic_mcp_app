@@ -24,7 +24,7 @@ class ReleaseManagerAgentUI(StreamlitUIManager):
                                      "detailed"
                                      ],
                                     help="Select the type of analysis to perform.")
-                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0,
+                fmt = st.radio("Select report format", ["markdown", "tabular"], index=0,
                                help="Select the format for the report.")
                 additional_instructions = st.text_input("Additional instructions (Max 300 chars)",
                                                         placeholder="Enter additional prompt", max_chars=300,

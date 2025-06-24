@@ -26,7 +26,7 @@ class GitOpsAgentUI(StreamlitUIManager):
                                            "contributor stats"
                                            ],
                                           help="Select the type of analysis you want to perform on the Git repository.")
-                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0,
+                fmt = st.radio("Select report format", ["markdown", "tabular"], index=0,
                                help="Select the format for the report output.")
 
             user_text = st.form_submit_button("Submit", disabled=st.session_state.is_processing)

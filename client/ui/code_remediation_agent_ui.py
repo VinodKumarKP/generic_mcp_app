@@ -34,7 +34,7 @@ class CodeRemediationAgentUI(StreamlitUIManager):
                                   ["result only without remediated code", "result with remediated code"],
                                   index=0,
                                   help="Select whether you want the results only or the results along with the remediated code.")
-                fmt = st.radio("Select report format", ["html", "markdown", "json", "text", "tabular"], index=0,
+                fmt = st.radio("Select report format", ["markdown", "tabular"], index=0,
                                help="Select the format for the report output.")
                 additional_instructions = st.text_input("Additional instructions (Max 300 chars)",
                                                         placeholder="Enter additional prompt", max_chars=300,

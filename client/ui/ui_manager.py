@@ -57,9 +57,10 @@ class StreamlitUIManager:
             option_list.update(
                 {values['name']: f"{key}:{values['name']}:{values['type']}:{values.get('order', 100)}" for key, values in
                  config['agent'].items() if
-                 values['type'] == 'mcp'})
+                 values['type'] == 'mcp' and
+                 values.get('active', True)})
             option_list.update({values['name']: f"{key}:{agent}:{values['type']}:{values.get('order', 100)}"
-                                for agent in agent_list for key, values in config['agent'].items() if key in agent})
+                                for agent in agent_list for key, values in config['agent'].items() if key in agent and values.get('active', True)})
 
             option_list = dict(sorted(option_list.items(), key=lambda item: int(item[1].split(":")[-1])))
 

@@ -14,13 +14,13 @@ class UIFactory:
     def create_ui_manager(agent_name: str, agent_manager: AgentManager):
         if agent_name == "name-lookup":
             return NameLookupAgentUI(agent_manager)
-        elif agent_name == "deployment-release-manager-agent":
+        elif agent_name == "intelligent-decisioning-agent":
             return ReleaseManagerAgentUI(agent_manager)
         elif agent_name == "git-ops-agent":
             return GitOpsAgentUI(agent_manager)
         elif agent_name == "devops-code-remediation-agent":
             return CodeRemediationAgentUI(agent_manager)
-        elif agent_name == "devops-lookup-agent":
+        elif agent_name == "devops-gpt-agent":
             return DevOpsGPTAgentUI(agent_manager)
         else:
             return StreamlitUIManager(agent_manager)
